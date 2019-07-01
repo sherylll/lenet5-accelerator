@@ -1,4 +1,5 @@
 # lenet5-accelerator
+This is the final project for [Special Course on Computer Architecture](http://www.am.ics.keio.ac.jp/comparc/), in which FPGA and GPU are used for acclerating a simple CNN LeNet-5. For FPGA and GPU, HLS and Cuda are used respectively.
 
 ## HLS
 ### Use the prepared code to generate HLS project
@@ -41,5 +42,12 @@ Product1: for(int ii = 0; ii < CONFIG_T::n_in; ii++) {
 - don't use local arrays too deep in the loop structure, which can result in large resource consumption
 
 ### Results
+The original accuracy is 98.89% and using 16-bit fixed point (w/o the softmax layer), accuracy becomes to 98.87%. The softmax layer introduces a further tiny drop in the accuracy.
 
+for xcku095-ffvb2104-1-c:
 
+for xcku115-flvb2014-2-e:
+
+## GPU
+
+### Results
