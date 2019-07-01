@@ -35,4 +35,4 @@
 .vscode/*
 *.log
 
-hls_prj/*
+hls_prj*

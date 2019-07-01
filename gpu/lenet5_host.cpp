@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string>
 #include <cstring>
+#include <ctime>
 #include "parameters.h"
 #include "lenet5.h"
 
@@ -54,6 +55,8 @@ int main(int argc, char **argv)
 
 	char x_str[10] = "";
 	char path_cstr[30];
+	clock_t begin_time, end_time;
+	double total_time = 0;
 
 	for (int im=0; im < TEST_SIZE; im ++){
 			sprintf(x_str, "%d.txt", im);
@@ -62,15 +65,20 @@ int main(int argc, char **argv)
 			strcpy(path_cstr, image_path.c_str());
 			if (read_to_array(path_cstr, data_str, &y_test) == 0){
 				unsigned short size_in, size_out;
+				begin_time = clock();
 				lenet5(data_str, probs);
+				end_time = clock();
+				total_time += double(end_time - begin_time) / CLOCKS_PER_SEC;
 				int y_pred = max_likelihood(probs);
-				std::cout << im << " " << (y_pred == y_test)<< std::endl;
+				// std::cout << im << " " << (y_pred == y_test)<< std::endl;
 				if (y_pred == y_test)
 					counter++;
 			}
 			else
 				std::cout << "failed to read file" << std::endl;
 	}
-	std::cout << counter;
+
+	std::cout << "(partial) accuracy: " <<  counter/(float)TEST_SIZE << std::endl;
+	std::cout << "average latency (inference/s): " << total_time/TEST_SIZE << std::endl;
 	return 0;
 }

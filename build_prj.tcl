@@ -24,7 +24,7 @@ add_files -tb test_images
 open_solution -reset "solution1"
 catch {config_array_partition -maximum_size 4096}
 #set_part {xcku095-ffvb2104-1-c}
-set_part {xcku115-flvb2014-2-e}
+set_part {xcku115-flvb2104-2-e}
 create_clock -period 10 -name default
 
 if {$opt(csim)} {

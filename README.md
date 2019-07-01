@@ -1,6 +1,13 @@
 # lenet5-accelerator
 This is the final project for [Special Course on Computer Architecture](http://www.am.ics.keio.ac.jp/comparc/), in which FPGA and GPU are used for acclerating a simple CNN LeNet-5. For FPGA and GPU, HLS and Cuda are used respectively.
 
+The C implementation of LeNet5 achieves a latency of about 0.005s/inference, and this is almost indifferent to the number of samples it run on.
+
+Hardware info:
+- CPU: Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz
+- GPU: GeForce GTX 970
+- FPGA: Xilinx Kintex Ultrascale
+
 ## HLS
 ### Use the prepared code to generate HLS project
 - run `vivado_hls -f build_prj.tcl` in this repo, and you'll have a synthesizale project.
@@ -9,7 +16,8 @@ This is the final project for [Special Course on Computer Architecture](http://w
 - Clone into [this repo](https://github.com/sherylll/hls4ml), which is a fork of this great project [hls4ml](https://github.com/hls-fpga-machine-learning/hls4ml)
 - `cd hls4ml/keras-to-hls`, create a new directory `lenet5-model-files`, and put the generated `saved_model.json` and `saved_weights.h5`
 - `python keras-to-hls.py -c keras-config.yml`, which generates the C source files for the HLS project
-- Build the HLS project by running `vivado_hls -f build_prj.tcl`
+- Build the HLS project by running `vivado_hls -f build_prj.tcl` (30~40 min)
+  - There will be a lot of 1's printed out, which mean correct inferences. 0 means incorrect inference.
 More information can be found in the [hls4ml](https://github.com/hls-fpga-machine-learning/hls4ml) repo. However the generated project without manual optimization can be not-synthesizable or have very poor performance.
 ### Testbench and test data
 - testbench: `lenet5_test.cpp`
@@ -44,10 +52,19 @@ Product1: for(int ii = 0; ii < CONFIG_T::n_in; ii++) {
 ### Results
 The original accuracy is 98.89% and using 16-bit fixed point (w/o the softmax layer), accuracy becomes to 98.87%. The softmax layer introduces a further tiny drop in the accuracy.
 
-for xcku095-ffvb2104-1-c:
-
-for xcku115-flvb2014-2-e:
+- xcku095-ffvb2104-1-c
+  - latency = interval = 54064 cycles * 10 ns/cycle
+  - resource usage
+    - BRAM 49%
+    - DSP 96%
+    - FF 12%
+    - LUT 46%
+- xcku115-flvb2014-2-e:
 
 ## GPU
+The code for GPU is located under `gpu`. Go to the directory and run `make` there. 
+
+The GPU code is based on the HLS code.
 
 ### Results
+
