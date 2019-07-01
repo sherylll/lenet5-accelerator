@@ -66,8 +66,8 @@ void apply_filter(
 #pragma HLS PIPELINE
   int oh_offset = oh * CONFIG_T::stride_height;
   int ow_offset = ow * CONFIG_T::stride_width;
-#pragma HLS ARRAY_PARTITION variable = mult
-#pragma HLS array_partition variable = data_block
+#pragma HLS ARRAY_PARTITION variable=mult
+#pragma HLS array_partition variable=data_block
 
 ConvFiltHeight:
   for (int fh = 0; fh < CONFIG_T::filt_height; fh++)
@@ -100,11 +100,12 @@ void conv_2d(
 {
   //Convert data to 1D
   data_T data_2d[CONFIG_T::in_height * CONFIG_T::in_width][CONFIG_T::n_chan];
-#pragma HLS ARRAY_PARTITION variable = data_2d dim = 1
+#pragma HLS ARRAY_PARTITION variable=data_2d dim = 1
   for (int ih = 0; ih < CONFIG_T::in_height; ih++)
   {
     for (int iw = 0; iw < CONFIG_T::in_width; iw++)
     {
+#pragma HLS pipeline
       for (int cc = 0; cc < CONFIG_T::n_chan; cc++)
       {
         data_2d[ih * CONFIG_T::in_width + iw][cc] = data[ih * CONFIG_T::in_width * CONFIG_T::n_chan + iw * CONFIG_T::n_chan + cc];
@@ -112,10 +113,13 @@ void conv_2d(
     }
   }
 
-  typename CONFIG_T::accum_t mult[CONFIG_T::out_height * CONFIG_T::out_width * CONFIG_T::n_filt * CONFIG_T::n_chan][CONFIG_T::filt_height * CONFIG_T::filt_width];
-#pragma HLS ARRAY_PARTITION variable = mult dim = 2
-  typename CONFIG_T::accum_t acc[CONFIG_T::out_height * CONFIG_T::out_width * CONFIG_T::n_filt];
+  typename CONFIG_T::accum_t mult[CONFIG_T::out_height * CONFIG_T::out_width][CONFIG_T::n_filt][CONFIG_T::n_chan][CONFIG_T::filt_height * CONFIG_T::filt_width];
+#pragma HLS ARRAY_PARTITION variable=mult dim = 2
+#pragma HLS ARRAY_PARTITION variable=mult dim = 3
+#pragma HLS ARRAY_PARTITION variable=mult dim = 4
 
+  typename CONFIG_T::accum_t acc[CONFIG_T::out_height * CONFIG_T::out_width][CONFIG_T::n_filt];
+#pragma HLS ARRAY_PARTITION variable=acc dim = 2
 // Convolve, saving all multiplication results to accumulate later
 ConvOutHeight:
   for (int oh = 0; oh < CONFIG_T::out_height; oh++)
@@ -130,7 +134,6 @@ ConvOutHeight:
       ConvChan:
         for (int cc = 0; cc < CONFIG_T::n_chan; cc++)
         {
-          //#pragma HLS PIPELINE or dataflow?
           data_T data_block[CONFIG_T::filt_height * CONFIG_T::filt_width];
           for (int fh = 0; fh < CONFIG_T::filt_height; fh++)
           {
@@ -140,8 +143,8 @@ ConvOutHeight:
               data_block[fh * CONFIG_T::filt_width + fw] = data_2d[(oh * CONFIG_T::stride_height + fh - CONFIG_T::pad_top) * CONFIG_T::in_width + (ow * CONFIG_T::stride_width + fw - CONFIG_T::pad_left)][cc];
             }
           }
-          int index_mult = oh * CONFIG_T::out_width * CONFIG_T::n_filt * CONFIG_T::n_chan + ow * CONFIG_T::n_filt * CONFIG_T::n_chan + ff * CONFIG_T::n_chan + cc;
-          apply_filter<data_T, typename CONFIG_T::accum_t, CONFIG_T>(data_block, mult[index_mult], weights, oh, ow, ff, cc);
+//          int index_mult = oh * CONFIG_T::out_width * CONFIG_T::n_filt * CONFIG_T::n_chan + ow * CONFIG_T::n_filt * CONFIG_T::n_chan + ff * CONFIG_T::n_chan + cc;
+          apply_filter<data_T, typename CONFIG_T::accum_t, CONFIG_T>(data_block, mult[oh * CONFIG_T::out_width + ow][ff][cc], weights, oh, ow, ff, cc);
 
         } //end filter width loop
       }   //end filter height loop
@@ -156,7 +159,7 @@ ConvOutHeight:
 #pragma HLS pipeline
       for (int ff = 0; ff < CONFIG_T::n_filt; ff++)
       {
-        acc[oh * CONFIG_T::out_width * CONFIG_T::n_filt + ow * CONFIG_T::n_filt + ff] = biases[ff];
+        acc[oh * CONFIG_T::out_width + ow][ff] = biases[ff];
       }
     }
   }
@@ -168,26 +171,28 @@ AccumOutHeight:
   AccumOutWidth:
     for (int ow = 0; ow < CONFIG_T::out_width; ow++)
     {
+#pragma HLS pipeline
     AccumFilt:
       for (int ff = 0; ff < CONFIG_T::n_filt; ff++)
       {
+    	  typename CONFIG_T::accum_t temp = 0;
         //Do "dot product" sum within filter and sum over channels
       AccumChan:
         for (int cc = 0; cc < CONFIG_T::n_chan; cc++)
         {
-#pragma HLS pipeline
         AccumDotHeight:
           for (int fh = 0; fh < CONFIG_T::filt_height; fh++)
           {
           AccumDotWidth:
             for (int fw = 0; fw < CONFIG_T::filt_width; fw++)
             {
-              int index_mult = oh * CONFIG_T::out_width * CONFIG_T::n_filt * CONFIG_T::n_chan + ow * CONFIG_T::n_filt * CONFIG_T::n_chan + ff * CONFIG_T::n_chan + cc;
-              acc[oh * CONFIG_T::out_width * CONFIG_T::n_filt + ow * CONFIG_T::n_filt + ff] += mult[index_mult][fh * CONFIG_T::filt_width + fw];
+//              int index_mult = oh * CONFIG_T::out_width * CONFIG_T::n_filt * CONFIG_T::n_chan + ow * CONFIG_T::n_filt * CONFIG_T::n_chan + ff * CONFIG_T::n_chan + cc;
+            	temp += mult[oh * CONFIG_T::out_width + ow][ff][cc][fh * CONFIG_T::filt_width + fw];
 
             } //end dot product filter width loop
           }   //end dot product filter height loop
         }     //end n channel loop
+        acc[oh * CONFIG_T::out_width + ow][ff] = temp;
       }       //end n filter loop
     }         //end output width loop
   }           //end output height loop
@@ -200,9 +205,9 @@ AccumOutHeight:
 #pragma HLS pipeline
       for (int ff = 0; ff < CONFIG_T::n_filt; ff++)
       {
-        int index = oh * CONFIG_T::out_width * CONFIG_T::n_filt + ow * CONFIG_T::n_filt + ff;
-        if (acc[index] > 0)
-          res[oh][ow][ff] = (res_T)acc[index];
+        int index = oh * CONFIG_T::out_width + ow;
+        if (acc[index][ff] > 0)
+          res[oh][ow][ff] = (res_T)acc[index][ff];
         else
           res[oh][ow][ff] = 0;
       }

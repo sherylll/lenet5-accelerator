@@ -141,9 +141,9 @@ void pooling2d(data_T data[CONFIG_T::in_height][CONFIG_T::in_width][CONFIG_T::n_
   const unsigned padded_height = CONFIG_T::in_height + CONFIG_T::pad_top + CONFIG_T::pad_bottom;
   const unsigned padded_width = CONFIG_T::in_width + CONFIG_T::pad_left + CONFIG_T::pad_right;
 
-  data_T pool[CONFIG_T::pool_height * CONFIG_T::pool_width];
-#pragma HLS array_partition variable=pool complete
   for(int ff = 0; ff < CONFIG_T::n_filt; ff++){
+	  data_T pool[CONFIG_T::pool_height * CONFIG_T::pool_width];
+#pragma HLS array_partition variable=pool complete
 	  // Loop over input image y in steps of stride
 	  for(int ii = 0; ii < padded_height; ii += CONFIG_T::stride_height){
 		  // Loop over input image x in steps of stride
@@ -165,10 +165,6 @@ void pooling2d(data_T data[CONFIG_T::in_height][CONFIG_T::in_width][CONFIG_T::n_
 				  }
 			  }
 			  // do the pooling
-        // TODO in the case of average pooling, need to reduce height * width to area of pool window
-        // not overlapping padding region
-			  // max pool
-//				  res[ii/CONFIG_T::stride_height][jj/CONFIG_T::stride_width][ff] =
 			  res[(ii/CONFIG_T::stride_height)*CONFIG_T::out_width*CONFIG_T::n_filt + (jj/CONFIG_T::stride_width) * CONFIG_T::n_filt + ff] =
 							  max<data_T, CONFIG_T::pool_height*CONFIG_T::pool_width>(pool);
 

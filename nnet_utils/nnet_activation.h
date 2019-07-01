@@ -222,11 +222,6 @@ void  softmax(data_T data[CONFIG_T::n_in], res_T res[CONFIG_T::n_in])
         initialized = true;
     }
 
-    if (CONFIG_T::io_type == io_parallel){
-        // Note: This is going to be a resource hog to run with pipeline, but hey, whatever
-        #pragma HLS PIPELINE
-    }
-
     // Index into the lookup table based on data for exponentials
     typename CONFIG_T::table_t exp_res[CONFIG_T::n_in];// different, independent, fixed point precision
     typename CONFIG_T::table_t exp_diff_res;// different, independent, fixed point precision

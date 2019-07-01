@@ -80,11 +80,10 @@ void lenet5(
     layer6_t layer6_out[N_LAYER_6];
     nnet::compute_layer<layer5_t, layer6_t, config6>(layer5_out, layer6_out, w6, b6);
 
-    result_t logits7[N_OUTPUTS];
+    layer6_t logits7[N_OUTPUTS];
 
-    nnet::compute_layer<layer6_t, result_t, config7>(layer6_out, res, w7, b7);
+    nnet::compute_layer<layer6_t, layer6_t, config7>(layer6_out, logits7, w7, b7);
 
-    // softmax causes accuracy to drop
-//    nnet::softmax<result_t, result_t, softmax_config7>(logits7, res);
+    nnet::softmax<layer6_t, result_t, softmax_config7>(logits7, res);
 
 }

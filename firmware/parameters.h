@@ -209,7 +209,7 @@ struct config7 : nnet::layer_config {
         };
 struct softmax_config7 : nnet::activ_config {
         static const unsigned n_in = N_OUTPUTS;
-        static const unsigned table_size = 1024;
+        static const unsigned table_size = 2048;
         static const unsigned io_type = nnet::io_serial;
         };
 
