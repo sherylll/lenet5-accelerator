@@ -3,7 +3,7 @@ This is the final project for [Special Course on Computer Architecture](http://w
 
 Hardware info:
 - CPU: Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz
-  - latency = ?s/inference, does not scale
+  - latency = 0.00157s/inference, does not scale
 - GPU: GeForce GTX 970
 - FPGA: Xilinx Kintex Ultrascale
 
