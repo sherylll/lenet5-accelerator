@@ -21,8 +21,8 @@
 #include "../firmware/weights/w7.h"
 #include "../firmware/weights/b7.h"
 
-__host__ void kernel_cpu(input_t data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1],
-    result_t res[N_OUTPUTS])
+__host__ void kernel_cpu(float data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1],
+    float res[N_OUTPUTS])
 {
     float conv2d_layer1_out[OUT_HEIGHT_1*OUT_WIDTH_1*N_FILT_1];
     nnet::conv_2d<config1>(data, conv2d_layer1_out, w1, b1);
@@ -50,8 +50,8 @@ __host__ void kernel_cpu(input_t data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1],
     // nnet::softmax<float, result_t, softmax_config7>(logits7, res); 
 }
 
-__global__ void kernel(input_t data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1],
-    result_t res[N_OUTPUTS])
+__global__ void kernel(float data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1], float res[N_OUTPUTS],
+    float *w1, float *b1, float *w3, float *b3, float *w5, float *b5, float *w6, float *b6, float *w7, float *b7)
 {
     float conv2d_layer1_out[OUT_HEIGHT_1*OUT_WIDTH_1*N_FILT_1];
     nnet::conv_2d<config1>(data, conv2d_layer1_out, w1, b1);
@@ -137,7 +137,7 @@ void lenet5(input_t data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1],
 
     // int block_size_1 = 32;
     // int num_blocks_1 = (OUT_HEIGHT_1 + block_size_1 - 1)/block_size_1;
-    kernel<<<1,1>>>(data_copy, res_copy);
+    kernel<<<1,1>>>(data_copy, res_copy, w1, b1, w3, b3, w5, b5, w6, b6, w7, b7);
     cudaDeviceSynchronize();
 
     // copy back

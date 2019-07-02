@@ -71,18 +71,6 @@ void conv_2d(
 } //end conv2d
 
 //////////// pool2d ////////////////
-template <typename T, int N>
-T max(T x[N])
-{
-#pragma HLS inline off
-    T y = x[0];
-    for (int i = 1; i < N; i++)
-    {
-        y = x[i] > y ? x[i] : y;
-    }
-    return y;
-}
-
 struct pooling2d_config
 {
     // IO size
@@ -141,8 +129,13 @@ void pooling2d(float data[CONFIG_T::in_height * CONFIG_T::in_width * CONFIG_T::n
                     }
                 }
                 // do the pooling
-                res[(ii / CONFIG_T::stride_height) * CONFIG_T::out_width * CONFIG_T::n_filt + (jj / CONFIG_T::stride_width) * CONFIG_T::n_filt + ff] =
-                    max<float, CONFIG_T::pool_height * CONFIG_T::pool_width>(pool);
+                float max_pool = pool[0];
+                for (int i = 1; i < N; i++)
+                {
+                    max_pool = pool[i] > max_pool ? pool[i] : max_pool;
+                }
+                res[(ii / CONFIG_T::stride_height) * CONFIG_T::out_width * CONFIG_T::n_filt + (jj / CONFIG_T::stride_width) * CONFIG_T::n_filt + ff] = max_pool;
+
             }
         }
     }
