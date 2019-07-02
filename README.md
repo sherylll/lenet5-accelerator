@@ -1,7 +1,7 @@
 # lenet5-accelerator
 This is the final project for [Special Course on Computer Architecture](http://www.am.ics.keio.ac.jp/comparc/), in which FPGA and GPU are used for acclerating a simple CNN LeNet-5. For FPGA and GPU, HLS and Cuda are used respectively.
 
-The C implementation of LeNet5 achieves a latency of about 0.005s/inference, and this is almost indifferent to the number of samples it run on.
+The C implementation of LeNet5 achieves a latency of about 0.0032s/inference, and this is almost indifferent to the number of samples it run on.
 
 Hardware info:
 - CPU: Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz
@@ -60,6 +60,10 @@ The original accuracy is 98.89% and using 16-bit fixed point (w/o the softmax la
     - FF 12%
     - LUT 46%
 - xcku115-flvb2014-2-e:
+  - latency: same as above
+  - resource usage
+  
+    ![resource usage](misc/resource_usage.png)
 
 ## GPU
 The code for GPU is located under `gpu`. Go to the directory and run `make` there. 
