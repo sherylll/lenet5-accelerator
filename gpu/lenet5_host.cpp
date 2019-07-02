@@ -28,7 +28,7 @@ int max_likelihood(result_t y[N_OUTPUTS])
 	return i_likely;
 }
 
-int read_to_array(char *path, input_t x_test[IMAGE_WIDTH*IMAGE_WIDTH*1], int *y_test)
+int read_to_array(char *path, input_t x_test[IMAGE_WIDTH * IMAGE_WIDTH * 1], int *y_test)
 {
 	std::ifstream inFile;
 	inFile.open(path);
@@ -40,7 +40,7 @@ int read_to_array(char *path, input_t x_test[IMAGE_WIDTH*IMAGE_WIDTH*1], int *y_
 	{
 		for (int j = 0; j < IMAGE_WIDTH; j++)
 		{
-			inFile >> x_test[i*IMAGE_WIDTH+j+0];
+			inFile >> x_test[i * IMAGE_WIDTH + j + 0];
 		}
 	}
 	inFile.close();
@@ -49,7 +49,7 @@ int read_to_array(char *path, input_t x_test[IMAGE_WIDTH*IMAGE_WIDTH*1], int *y_
 
 int main(int argc, char **argv)
 {
-	input_t  data_str[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1];
+	input_t data_str[IN_HEIGHT_1 * IN_WIDTH_1 * N_CHAN_1];
 	result_t probs[N_OUTPUTS] = {0};
 	int y_test, counter = 0;
 
@@ -58,27 +58,29 @@ int main(int argc, char **argv)
 	clock_t begin_time, end_time;
 	double total_time = 0;
 
-	for (int im=0; im < TEST_SIZE; im ++){
-			sprintf(x_str, "%d.txt", im);
-			std::string image_path = "../test_images/";
-			image_path += std::string(x_str);
-			strcpy(path_cstr, image_path.c_str());
-			if (read_to_array(path_cstr, data_str, &y_test) == 0){
-				unsigned short size_in, size_out;
-				begin_time = clock();
-				lenet5(data_str, probs);
-				end_time = clock();
-				total_time += double(end_time - begin_time) / CLOCKS_PER_SEC;
-				int y_pred = max_likelihood(probs);
-				// std::cout << im << " " << (y_pred == y_test)<< std::endl;
-				if (y_pred == y_test)
-					counter++;
-			}
-			else
-				std::cout << "failed to read file" << std::endl;
+	for (int im = 0; im < TEST_SIZE; im++)
+	{
+		sprintf(x_str, "%d.txt", im);
+		std::string image_path = "../test_images/";
+		image_path += std::string(x_str);
+		strcpy(path_cstr, image_path.c_str());
+		if (read_to_array(path_cstr, data_str, &y_test) == 0)
+		{
+			unsigned short size_in, size_out;
+			begin_time = clock();
+			lenet5(data_str, probs);
+			end_time = clock();
+			total_time += double(end_time - begin_time) / CLOCKS_PER_SEC;
+			int y_pred = max_likelihood(probs);
+			// std::cout << im << " " << (y_pred == y_test)<< std::endl;
+			if (y_pred == y_test)
+				counter++;
+		}
+		else
+			std::cout << "failed to read file" << std::endl;
 	}
 
-	std::cout << "(partial) accuracy: " <<  counter/(float)TEST_SIZE << std::endl;
-	std::cout << "average latency (inference/s): " << total_time/TEST_SIZE << std::endl;
+	std::cout << "(partial) accuracy: " << counter / (float)TEST_SIZE << std::endl;
+	std::cout << "average latency (inference/s): " << total_time / TEST_SIZE << std::endl;
 	return 0;
 }

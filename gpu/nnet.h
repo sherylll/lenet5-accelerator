@@ -33,6 +33,42 @@ struct conv2d_config
     typedef float accum_t;
 };
 
+template <typename CONFIG_T>
+void conv_2d(
+    float data[CONFIG_T::in_height * CONFIG_T::in_width * CONFIG_T::n_chan],
+    float res[CONFIG_T::out_height * CONFIG_T::out_width * CONFIG_T::n_filt],
+    float weights[CONFIG_T::filt_height * CONFIG_T::filt_width * CONFIG_T::n_chan * CONFIG_T::n_filt],
+    float biases[CONFIG_T::n_filt])
+{
+    for (int oh = 0; oh < CONFIG_T::out_height; oh++)
+    {
+        for (int ow = 0; ow < CONFIG_T::out_width; ow++)
+        {
+            for (int ff = 0; ff < CONFIG_T::n_filt; ff++)
+            {
+                float temp = 0;
+                for (int cc = 0; cc < CONFIG_T::n_chan; cc++)
+                {
+                    for (int fh = 0; fh < CONFIG_T::filt_height; fh++)
+                    {
+                        for (int fw = 0; fw < CONFIG_T::filt_width; fw++)
+                        {
+                            int index_weight = fh * CONFIG_T::filt_width * CONFIG_T::n_chan * CONFIG_T::n_filt + fw * CONFIG_T::n_chan * CONFIG_T::n_filt + cc * CONFIG_T::n_filt + ff;
+                            // assuming there is no padding
+                            if ((oh + fh) < CONFIG_T::in_height && (ow + fw) < CONFIG_T::in_width)
+                                temp += data[((oh + fh) * CONFIG_T::in_width + (ow + fw)) * CONFIG_T::n_chan + cc] * weights[index_weight];
+                
+                        } //end mult loop
+                    }     //end channel loop
+
+                } //end filter width loop
+                float res_ = temp + biases[ff];
+                res[(oh * CONFIG_T::out_width + ow) * CONFIG_T::n_filt + ff] = (res_ > 0)?res_:0;
+
+            }     //end filter height loop
+        }         //end output width loop
+    }             //end output height loop
+} //end conv2d
 
 //////////// pool2d ////////////////
 template <typename T, int N>
