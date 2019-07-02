@@ -1,9 +1,9 @@
 '''
-CPU ()
+CPU (Intel i7-7500 CPU @ 2.0GHz)
 N = [10, 100, 1000, 10000]
-latency = [0.007694172859191895, 0.0007482528686523438, 0.00013990330696105958, 7.997174263000488e-05]
-GPU ()
-latency = []
+latency = [0.0078, 0.00047, 0.000219, 0.000199], acceleration flattens out due to limited memory on a mobile cpu
+GPU (GeForce 940MX)
+latency = [0.2383,0.0128, 0.00132, 0.0002]
 '''
 
 import tensorflow as tf
@@ -17,7 +17,6 @@ import time
 import sys
 saved_model_dir = 'misc/saved_model.json'
 saved_weights_dir = 'misc/saved_weights.h5'
-saved_graph_dir = 'misc/keras_lenet_infer.png'
 
 if __name__ == "__main__":
     with open(saved_model_dir) as f:

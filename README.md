@@ -1,10 +1,9 @@
 # lenet5-accelerator
 This is the final project for [Special Course on Computer Architecture](http://www.am.ics.keio.ac.jp/comparc/), in which FPGA and GPU are used for acclerating a simple CNN LeNet-5. For FPGA and GPU, HLS and Cuda are used respectively.
 
-The C implementation of LeNet5 achieves a latency of about 0.0032s/inference, and this is almost indifferent to the number of samples it run on.
-
 Hardware info:
 - CPU: Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz
+  - latency = 0.0032s/inference, does not scale
 - GPU: GeForce GTX 970
 - FPGA: Xilinx Kintex Ultrascale
 
@@ -72,3 +71,9 @@ The GPU code is based on the HLS code.
 
 ### Results
 
+## LeNet5 in Keras 
+The framework implementation has much better scalability comparing to the naive C implementation:
+
+![keras](misc/keras_lenet_infer.png)
+
+Note that the CPU/GPU used are different from above, which are Intel i7-7500 and GeForce 940MX, just because I have the environment setup on my own laptop.
