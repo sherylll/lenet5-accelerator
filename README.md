@@ -3,7 +3,7 @@ This is the final project for [Special Course on Computer Architecture](http://w
 
 Hardware info:
 - CPU: Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz
-  - latency = 0.0032s/inference, does not scale
+  - latency = ?s/inference, does not scale
 - GPU: GeForce GTX 970
 - FPGA: Xilinx Kintex Ultrascale
 
@@ -70,6 +70,9 @@ The code for GPU is located under `gpu`. Go to the directory and run `make` ther
 The GPU code is based on the HLS code.
 
 ### Results
+
+### Note
+It is also possible to implement the Cuda kernel as C++ templates, as explained in [this blog post](https://devblogs.nvidia.com/power-cpp11-cuda-7/). 
 
 ## LeNet5 in Keras 
 The framework implementation has much better scalability comparing to the naive C implementation:

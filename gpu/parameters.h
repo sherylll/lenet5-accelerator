@@ -41,6 +41,9 @@ typedef float result_t;
 #define N_LAYER_6 84
 #define N_OUTPUTS 10
 
+#define FILT_HEIGHT 5
+#define FILT_WIDTH 5
+
 typedef float layer1_t;
 typedef float layer2_t;
 typedef float layer3_t;
