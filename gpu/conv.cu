@@ -12,9 +12,12 @@ __global__ void conv_2d_2(
     int ow= blockIdx.x * blockDim.x + threadIdx.x;
     if (oh>=IN_HEIGHT_3-FILT_HEIGHT+1 || ow>=IN_WIDTH_3-FILT_WIDTH+1)
         return;
+    int ff = blockIdx.z * blockDim.z + threadIdx.z;
+    if (ff >= N_FILT_3)
+        return;
     int offset = (oh * OUT_WIDTH_3 + ow)*N_FILT_3;
-    for (int ff = 0; ff < N_FILT_3; ff++)
-    {
+    //for (int ff = 0; ff < N_FILT_3; ff++)
+    //{
         float temp = biases[ff];
         for (int cc = 0; cc < N_CHAN_3; cc++)
         {
@@ -31,5 +34,5 @@ __global__ void conv_2d_2(
             }     //end channel loop
         } //end filter width loop
         res[offset + ff] = (temp > 0)?temp:0;
-    }     //end filter height loop
+    //}     //end filter height loop
 } //end conv2d

@@ -24,10 +24,10 @@ static bool initialized = 0;
 static float *d_pool2d_layer2_out;
 static float *d_conv2d_layer3_out;
 static float *w3_copy, *b3_copy;
-static int block_size_1 = 12;
-static int num_blocks_1 = (OUT_HEIGHT_1 + block_size_1 - 1)/block_size_1;
-static dim3 block(block_size_1,block_size_1);
-static dim3 grid (num_blocks_1, num_blocks_1);
+//static int block_size_1 = 12;
+//static int num_blocks_1 = (OUT_HEIGHT_1 + block_size_1 - 1)/block_size_1;
+static dim3 block(4, 1, 1);
+static dim3 grid (12, 12, 16);
 #endif
 
 void lenet5(
