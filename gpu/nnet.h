@@ -57,10 +57,8 @@ void conv_2d(
                             // assuming there is no padding
                             if ((oh + fh) < CONFIG_T::in_height && (ow + fw) < CONFIG_T::in_width)
                                 temp += data[((oh + fh) * CONFIG_T::in_width + (ow + fw)) * CONFIG_T::n_chan + cc] * weights[index_weight];
-                
                         } //end mult loop
                     }     //end channel loop
-
                 } //end filter width loop
                 float res_ = temp + biases[ff];
                 res[(oh * CONFIG_T::out_width + ow) * CONFIG_T::n_filt + ff] = (res_ > 0)?res_:0;
@@ -130,7 +128,7 @@ void pooling2d(float data[CONFIG_T::in_height * CONFIG_T::in_width * CONFIG_T::n
                 }
                 // do the pooling
                 float max_pool = pool[0];
-                for (int i = 1; i < N; i++)
+                for (int i = 1; i < CONFIG_T::pool_height*CONFIG_T::pool_width; i++)
                 {
                     max_pool = pool[i] > max_pool ? pool[i] : max_pool;
                 }

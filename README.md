@@ -3,9 +3,13 @@ This is the final project for [Special Course on Computer Architecture](http://w
 
 Hardware info:
 - CPU: Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz
-  - latency = 0.00157s/inference, does not scale
+  - latency = 1.57ms/inference
 - GPU: GeForce GTX 970
+  - latency = 1.9ms (with a batch size of 100)
 - FPGA: Xilinx Kintex Ultrascale
+  - latency = 0.54ms/inference
+
+For real-time application or inference of small batch size, FPGA is the fastest. 
 
 ## HLS
 ### Use the prepared code to generate HLS project
@@ -60,23 +64,30 @@ The original accuracy is 98.89% and using 16-bit fixed point (w/o the softmax la
     - LUT 46%
 - xcku115-flvb2014-2-e:
   - latency: same as above
+
+    ![latency](misc/fpga_latency.png)
+
   - resource usage
   
     ![resource usage](misc/resource_usage.png)
 
 ## GPU
-The code for GPU is located under `gpu`. Go to the directory and run `make` there. 
+The code for GPU is located under `gpu`. Under the `gpu` directory, run `make cpu` or `make gpu` to build the CPU or GPU version of the code. The results are averaged over 100 samples.
 
-The GPU code is based on the HLS code.
+The CPU/GPU coding style is very different from HLS, especially the convolution part, as can be learned from this project.
 
-### Results
+## Results
+In this implementation, only the most expensive part (second conv layer) is moved to CUDA kernel, everything else stays in the host. 
+Since there is a large overhead induced by the memory allocation and kernel launching, the overall latency averaged over 100 inferences is slightly worse than CPU (1.90 vs 1.57ms/inference). However if we compare the kernel only, GPU is abuot 50 times faster than CPU (0.14ms vs 7.3ms). This advantage only manifests itself when there is a large amount of data using the same parameters, which can be prefetched into GPU.
 
-### Note
+### Future work
 It is also possible to implement the Cuda kernel as C++ templates, as explained in [this blog post](https://devblogs.nvidia.com/power-cpp11-cuda-7/). 
 
 ## LeNet5 in Keras 
-The framework implementation has much better scalability comparing to the naive C implementation:
+For a comparison, the evaluation is done with Keras + TF:
 
 ![keras](misc/keras_lenet_infer.png)
 
-Note that the CPU/GPU used are different from above, which are Intel i7-7500 and GeForce 940MX, just because I have the environment setup on my own laptop.
+The reduction in latency flattens out mainly due to limited memory on my laptop, if the CPU/GPU memory is large enough, the framework implementation will show even better scalability.
+
+Note that the CPU/GPU used are different from above, which are Intel i7-7500 and GeForce 940MX, which is because I have the environment setup on my own laptop.
