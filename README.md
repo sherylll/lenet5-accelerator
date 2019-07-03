@@ -3,9 +3,9 @@ This is the final project for [Special Course on Computer Architecture](http://w
 
 Hardware info:
 - CPU: Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz
-  - latency = 1.57ms/inference
+  - latency = 1.59ms/inference
 - GPU: GeForce GTX 970
-  - latency = 1.9ms (with a batch size of 100)
+  - latency = 3.5ms (with a batch size of 100)
 - FPGA: Xilinx Kintex Ultrascale
   - latency = 0.54ms/inference
 
@@ -78,7 +78,7 @@ The CPU/GPU coding style is very different from HLS, especially the convolution 
 
 ## Results
 In this implementation, only the most expensive part (second conv layer) is moved to CUDA kernel, everything else stays in the host. 
-Since there is a large overhead induced by the memory allocation and kernel launching, the overall latency averaged over 100 inferences is slightly worse than CPU (1.90 vs 1.57ms/inference). However if we compare the kernel only, GPU is abuot 50 times faster than CPU (0.14ms vs 7.3ms). This advantage only manifests itself when there is a large amount of data using the same parameters, which can be prefetched into GPU.
+Since there is a large overhead induced by the memory allocation and kernel launching, the overall latency averaged over 100 inferences is slightly worse than CPU (3.50 vs 1.59ms/inference). However if we compare the kernel only, GPU is abuot 40 times faster than CPU (0.225ms vs 9ms). This advantage only manifests itself when there is a large amount of data using the same parameters, which can be prefetched into GPU.
 
 ### Future work
 It is also possible to implement the Cuda kernel as C++ templates, as explained in [this blog post](https://devblogs.nvidia.com/power-cpp11-cuda-7/). 
