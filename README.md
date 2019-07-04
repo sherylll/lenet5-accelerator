@@ -76,6 +76,8 @@ The code for GPU is located under `gpu`. Under the `gpu` directory, run `make cp
 
 The CPU/GPU coding style is very different from HLS, especially the convolution part, as can be learned from this project.
 
+The most expensive part, i.e. the second conv layer is accelerated with GPU, by replacing the 3 outermost loops with 3D grids. 
+
 ## Results
 In this implementation, only the most expensive part (second conv layer) is moved to CUDA kernel, everything else stays in the host. 
 Since there is a large overhead induced by the memory allocation and kernel launching, the overall latency averaged over 100 inferences is slightly worse than CPU (3.50 vs 1.59ms/inference). However if we compare the kernel only, GPU is abuot 20 times faster than CPU (0.042ms vs 0.9ms). This advantage only manifests itself when there is a large amount of data using the same parameters, which can be prefetched into GPU.

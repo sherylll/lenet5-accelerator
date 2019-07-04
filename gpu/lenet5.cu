@@ -24,15 +24,12 @@ static bool initialized = 0;
 static float *d_pool2d_layer2_out;
 static float *d_conv2d_layer3_out;
 static float *w3_copy, *b3_copy;
-//static int block_size_1 = 12;
-//static int num_blocks_1 = (OUT_HEIGHT_1 + block_size_1 - 1)/block_size_1;
 static dim3 block(4, 1, 1);
-static dim3 grid (12, 12, 16);
+static dim3 grid (OUT_HEIGHT_3, OUT_HEIGHT_3, N_FILT_3);
 #endif
 
-void lenet5(
-		  input_t data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1],
-          result_t res[N_OUTPUTS], bool cleanup)
+void lenet5(input_t data[IN_HEIGHT_1*IN_WIDTH_1*N_CHAN_1],
+            result_t res[N_OUTPUTS], bool cleanup)
 {
 
     float conv2d_layer1_out[OUT_HEIGHT_1*OUT_WIDTH_1*N_FILT_1];
@@ -41,14 +38,15 @@ void lenet5(
     float pool2d_layer2_out[OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2];
     nnet::pooling2d<config2>(conv2d_layer1_out, pool2d_layer2_out);
 #ifdef USE_CPU
-	clock_t begin_time, end_time;
-    begin_time = clock();
+    // start timer
+    clock_t begin_time = clock();
 
     float conv2d_layer3_out[OUT_HEIGHT_3 * OUT_WIDTH_3 * N_FILT_3];
     nnet::conv_2d<config3>(pool2d_layer2_out, conv2d_layer3_out, w3, b3);
 
-    end_time = clock();
-    printf("%f\n", double(end_time - begin_time) / CLOCKS_PER_SEC);
+    // end timer
+    clock_t end_time = clock();
+    printf("CPU kernel time: %f ms\n", double(end_time - begin_time) / CLOCKS_PER_SEC * 1000);
 #else
     // prepare memory
     if (!initialized)
@@ -64,20 +62,21 @@ void lenet5(
     
     cudaMemcpy(d_pool2d_layer2_out, pool2d_layer2_out, sizeof(float)*OUT_HEIGHT_2*OUT_WIDTH_2*N_FILT_2, cudaMemcpyHostToDevice);
 
-    // measure time
+    // start timer
     cudaEvent_t start, stop;
     float elapsedTime;
     cudaEventCreate(&start);
     cudaEventRecord(start,0);
-
-    //Do kernel activity here
+    
+    // gpu kernel
     conv_2d_2<<<grid,block>>>(d_pool2d_layer2_out, d_conv2d_layer3_out, w3_copy, b3_copy);
 
+    // end timer
     cudaEventCreate(&stop);
     cudaEventRecord(stop,0);
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&elapsedTime, start,stop);
-    printf("Elapsed time : %f ms\n" ,elapsedTime);
+    printf("GPU kernel time: %f ms\n" ,elapsedTime);
 
     // device to host
     float conv2d_layer3_out[OUT_HEIGHT_3 * OUT_WIDTH_3 * N_FILT_3];

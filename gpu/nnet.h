@@ -106,8 +106,6 @@ void pooling2d(float data[CONFIG_T::in_height * CONFIG_T::in_width * CONFIG_T::n
             // Loop over input image x in steps of stride
             for (int jj = 0; jj < padded_width; jj += CONFIG_T::stride_width)
             {
-                // Keep track of number of pixels in image vs padding region
-                unsigned img_overlap = 0;
                 // Loop over pool window y
                 for (int kk = 0; kk < CONFIG_T::stride_height; kk++)
                 {
@@ -122,7 +120,6 @@ void pooling2d(float data[CONFIG_T::in_height * CONFIG_T::in_width * CONFIG_T::n
                         else
                         {
                             pool[kk * CONFIG_T::stride_width + ll] = data[((ii + kk)*CONFIG_T::in_width + (jj + ll))*CONFIG_T::n_filt + ff];
-                            img_overlap++;
                         }
                     }
                 }
@@ -177,10 +174,7 @@ void compute_layer(
     // Cast to "float" type
     for (int ires = 0; ires < CONFIG_T::n_out; ires++)
     {
-        if (acc[ires] > 0)
-            res[ires] = (float)(acc[ires]);
-        else
-            res[ires] = 0;
+        res[ires] = acc[ires] > 0 ? acc[ires] : 0;
     }
 }
 

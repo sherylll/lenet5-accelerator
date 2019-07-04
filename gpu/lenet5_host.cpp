@@ -81,6 +81,6 @@ int main(int argc, char **argv)
 	}
 
 	std::cout << "(partial) accuracy: " <<  counter/(float)TEST_SIZE << std::endl;
-	std::cout << "average latency (inference/s): " << total_time/TEST_SIZE << std::endl;
+	std::cout << "average inference time including memory access: " << total_time/TEST_SIZE  * 1000 << "ms" << std::endl;
 	return 0;
 }
