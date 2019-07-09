@@ -57,7 +57,6 @@ struct conv2d_config
 template <class data_T, class res_T, typename CONFIG_T>
 void apply_filter(
     data_T data_block[CONFIG_T::filt_height * CONFIG_T::filt_width],
-    //		 data_T   data_2d[CONFIG_T::in_height*CONFIG_T::in_width][CONFIG_T::n_chan],
     res_T mult[CONFIG_T::filt_height * CONFIG_T::filt_width],
     typename CONFIG_T::weight_t weights[CONFIG_T::filt_height * CONFIG_T::filt_width * CONFIG_T::n_chan * CONFIG_T::n_filt],
     int oh, int ow, int ff, int cc)
@@ -83,10 +82,8 @@ ConvFiltHeight:
       }
       else
       {
-        //        			mult[index_mult] = data[oh_offset+fh-CONFIG_T::pad_top][ow_offset+fw-CONFIG_T::pad_left][cc] * weights[index_weight];
         mult[fh * CONFIG_T::filt_width + fw] = data_block[fh * CONFIG_T::filt_width + fw] * weights[index_weight];
       }
-
     } //end mult loop
   }   //end channel loop
 }
@@ -143,9 +140,7 @@ ConvOutHeight:
               data_block[fh * CONFIG_T::filt_width + fw] = data_2d[(oh * CONFIG_T::stride_height + fh - CONFIG_T::pad_top) * CONFIG_T::in_width + (ow * CONFIG_T::stride_width + fw - CONFIG_T::pad_left)][cc];
             }
           }
-//          int index_mult = oh * CONFIG_T::out_width * CONFIG_T::n_filt * CONFIG_T::n_chan + ow * CONFIG_T::n_filt * CONFIG_T::n_chan + ff * CONFIG_T::n_chan + cc;
           apply_filter<data_T, typename CONFIG_T::accum_t, CONFIG_T>(data_block, mult[oh * CONFIG_T::out_width + ow][ff][cc], weights, oh, ow, ff, cc);
-
         } //end filter width loop
       }   //end filter height loop
     }     //end output width loop
@@ -186,9 +181,7 @@ AccumOutHeight:
           AccumDotWidth:
             for (int fw = 0; fw < CONFIG_T::filt_width; fw++)
             {
-//              int index_mult = oh * CONFIG_T::out_width * CONFIG_T::n_filt * CONFIG_T::n_chan + ow * CONFIG_T::n_filt * CONFIG_T::n_chan + ff * CONFIG_T::n_chan + cc;
             	temp += mult[oh * CONFIG_T::out_width + ow][ff][cc][fh * CONFIG_T::filt_width + fw];
-
             } //end dot product filter width loop
           }   //end dot product filter height loop
         }     //end n channel loop

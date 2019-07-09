@@ -28,8 +28,11 @@
 #include "nnet_helpers.h"
 
 #define IMAGE_WIDTH 28
-#define TEST_SIZE 100 // full test set has 10000 samples
-
+#ifdef C_COSIM
+  #define TEST_SIZE 10
+#else
+  #define TEST_SIZE 100 // full test set has 10000 samples
+#endif
 
 
 int max_likelihood(result_t y[N_OUTPUTS])
